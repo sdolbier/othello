@@ -10,18 +10,15 @@
 Player::Player(Side side) {
     // Will be set to true in test_minimax.cpp.
     testingMinimax = false;
-
-    /* 
-     * TODO: Do any initialization you need to do here (setting up the board,
-     * precalculating things, etc.) However, remember that you will only have
-     * 30 seconds.
-     */
+    board = new Board();
+    color = side;
 }
 
 /*
  * Destructor for the player.
  */
 Player::~Player() {
+    delete board;
 }
 
 /*
@@ -37,9 +34,99 @@ Player::~Player() {
  * return NULL.
  */
 Move *Player::doMove(Move *opponentsMove, int msLeft) {
-    /* 
-     * TODO: Implement how moves your AI should play here. You should first
-     * process the opponent's opponents move before calculating your own move
-     */ 
-    return NULL;
+    if(color == WHITE)
+    {
+        board->doMove(opponentsMove, BLACK);
+    }
+    else
+    {
+        board->doMove(opponentsMove, WHITE);
+    }
+    Move m(0,0);
+    int maxScore = -100;
+    Move best(0,0);
+    for(int i = 0; i < 8; i++)
+    {
+        for(int j = 0; j < 8; j++)
+        {
+            m.setX(i);
+            m.setY(j);
+            if (board->checkMove(&m, color))
+            {
+                Board* temp = board->copy();
+                temp->doMove(&m, color);
+                int score;
+                if(color==BLACK)
+                {
+                    score = temp->countBlack()-temp->countWhite();
+                }
+                else
+                {
+                    score = temp->countWhite()-temp->countBlack();
+                }
+                score = multiplier(i, j, score);
+                if (score > maxScore)
+                {
+                    best = m;
+                    maxScore = score;
+                }
+            }
+        }
+    }
+    if (!(board->checkMove(&best, color)))
+    {
+        return NULL;
+    }
+    board->doMove(&best, color);
+    Move* previous = new Move(best.getX(), best.getY());
+    return previous;
+}
+
+int multiplier(int x, int y, int score)
+{
+    if(x==0 || x==7)
+    {
+        if(y==0 || y==7)
+        {
+            return score+5;
+        }
+        else if(y==1 || y==6)
+        {
+            return score-2;
+        }
+        else
+        {
+            return score+3;
+        }
+    }
+    else if(y==0 || y==7)
+    {
+        if(x==1 || x==6)
+        {
+            return score-2;
+        }
+        else
+        {
+            return score+3;
+        }
+    }
+    else if(x==1 || x==6)
+    {
+        if(y==1 || y==6)
+        {
+            return score-3;
+        }
+        else
+        {
+            return score-1;
+        }
+    }
+    else if(y==1 || y==6)
+    {
+        return score-1;
+    }
+    else
+    {
+        return score;
+    }
 }

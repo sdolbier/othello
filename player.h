@@ -16,6 +16,9 @@ public:
 
     // Flag to tell if the player is running within the test_minimax context
     bool testingMinimax;
+    Board* board;
+    Side color;
 };
+int multiplier(int x, int y, int score);
 
 #endif
